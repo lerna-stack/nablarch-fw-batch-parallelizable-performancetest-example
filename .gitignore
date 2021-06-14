@@ -1,0 +1,40 @@
+### Java ###
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+### IntelliJ IDEA
+.idea/
+*.iml
+
+### Nablarch ###
+target
+.config
+.project
+.classpath
+WebContent/META-INF/MANIFEST.MF
+
+### Example Batch ###
+work/registration/input/*
+!.gitkee
+!work/registration/tmp
+
+## h2
+h2/db
+
+## test output
+work/test/importZipCode/*.csv
+
+## GSP output
+gsp-target/*
+
+### Others
+*.log
+work/registration/tmp/*.pdf
+work/test/registration/tmp/*.pdf

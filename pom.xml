@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- See POM Reference https://maven.apache.org/pom.html -->
+
+  <!--
+    Basic
+  -->
+  <groupId>com.lerna-stack</groupId>
+  <artifactId>nablarch-fw-batch-parallelizable-performancetest-example</artifactId>
+  <version>1.2.0</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <scheme>バッチ</scheme>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <db.adminUser>admin</db.adminUser>
+    <db.user>NABLARCH_EXAMPLE</db.user>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.nablarch.profile</groupId>
+        <artifactId>nablarch-bom</artifactId>
+        <version>5u19</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.nablarch.profile</groupId>
+      <artifactId>nablarch-batch</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.lerna-stack</groupId>
+        <artifactId>nablarch-fw-batch-parallelizable</artifactId>
+        <version>1.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.nablarch.integration</groupId>
+      <artifactId>slf4j-nablarch-adaptor</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.nablarch.configuration</groupId>
+      <artifactId>nablarch-main-default-configuration</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.el</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.200</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+      <version>3.3.1</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>5.3.6.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jpa_2.0_spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.nablarch.framework</groupId>
+      <artifactId>nablarch-testing</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.nablarch.framework</groupId>
+      <artifactId>nablarch-fw-messaging-http</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.nablarch.configuration</groupId>
+      <artifactId>nablarch-testing-default-configuration</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+
+  <!--
+    Build Settings
+  -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>jp.co.tis.gsp</groupId>
+        <artifactId>gsp-dba-maven-plugin</artifactId>
+        <version>4.4.1</version>
+        <configuration>
+          <erdFile>src/main/resources/entity/data-model.edm</erdFile>
+          <!-- Driver -->
+          <driver>org.h2.Driver</driver>
+          <url>jdbc:h2:./h2/db/nablarch_example</url>
+          <!-- Auth -->
+          <adminUser>${db.adminUser}</adminUser>
+          <adminPassword>${db.adminUser}</adminPassword>
+          <!-- プロパティを参照するとログインに失敗するため -->
+          <user>NABLARCH_EXAMPLE</user>
+          <password>NABLARCH_EXAMPLE</password>
+          <schema>PUBLIC</schema>
+          <!-- codegen -->
+          <rootPackage>com.nablarch.example.app</rootPackage>
+          <entityPackageName>entity</entityPackageName>
+          <useAccessor>true</useAccessor>
+          <javaFileDestDir>${project.build.directory}/generated-sources/entity</javaFileDestDir>
+          <dataDirectory>src/test/resources/data</dataDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>default-cli</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>generate-ddl</goal>
+              <goal>execute-ddl</goal>
+              <goal>generate-entity</goal>
+              <goal>load-data</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+            <scope>runtime</scope>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/entity</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+              <mainClass>nablarch.fw.launcher.Main</mainClass>
+            </manifest>
+          </archive>
+          <excludes>
+            <exclude>*.dicon</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>distribution.xml</descriptor>
+              </descriptors>
+              <finalName>application-${project.version}</finalName>
+              <appendAssemblyId>false</appendAssemblyId>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- カバレッジ取得 -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.6</version>
+        <configuration>
+          <excludes>
+            <exclude>**/com/nablarch/example/app/entity/*</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+  <!--
+    Project Information
+  -->
+  <name>nablarch-fw-batch-parallelizable-example</name>
+  <description>An example of nablarch-fw-batch-parallelizable</description>
+  <url>https://github.com/lerna-stack/nablarch-fw-batch-parallelizable-example/</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <organization>
+    <name>Lerna Project</name>
+    <url>https://lerna-stack.github.io/</url>
+  </organization>
+  <developers>
+    <developer>
+      <id>lerna</id>
+      <name>Lerna Team</name>
+      <email>go-reactive@tis.co.jp</email>
+      <url>https://lerna-stack.github.io/</url>
+    </developer>
+  </developers>
+
+
+  <!--
+    Environment Settings
+  -->
+  <scm>
+    <connection>scm:git:https://github.com/lerna-stack/nablarch-fw-batch-parallelizable-example.git</connection>
+    <developerConnection>scm:git:git@github.com:lerna-stack/nablarch-fw-batch-parallelizable-example.git</developerConnection>
+    <tag>main</tag>
+    <url>https://github.com/lerna-stack/nablarch-fw-batch-parallelizable-example</url>
+  </scm>
+
+</project>
